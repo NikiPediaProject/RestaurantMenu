@@ -1,6 +1,6 @@
 ﻿#include "parsers.h"
 
-// Реализации NumberParser
+// ==================== NUMBER PARSER ====================
 
 NumberParser::NumberParser() : result_(0.0), isValid_(false) {}
 
@@ -32,29 +32,25 @@ bool NumberParser::parse(const std::string& str) {
 	return true;
 }
 
-bool NumberParser::isValid() const { return isValid_; }
-double NumberParser::getResult() const { return result_; }
-void NumberParser::reset() { result_ = 0.0; isValid_ = false; }
+bool NumberParser::isValid() const {
+	return isValid_;
+}
 
-// Реализации TimeParser
+double NumberParser::getResult() const {
+	return result_;
+}
+
+void NumberParser::reset() {
+	result_ = 0.0;
+	isValid_ = false;
+}
+
+// ==================== TIME PARSER ====================
 
 TimeParser::TimeParser() : result_(0, 0), isValid_(false) {}
 
 bool TimeParser::isValidTime(const Time& time) {
 	return time.hours >= 0 && time.minutes >= 0;
-}
-
-Time TimeParser::normalizeTime(const Time& time) {
-	Time result = time;
-	if (result.minutes >= 60) {
-		result.hours += result.minutes / 60;
-		result.minutes = result.minutes % 60;
-	}
-	if (result.hours > 100) {
-		result.hours = 100;
-		result.minutes = 0;
-	}
-	return result;
 }
 
 bool TimeParser::parse(const std::string& token) {
@@ -90,12 +86,20 @@ bool TimeParser::parse(const std::string& token) {
 	return false;
 }
 
-bool TimeParser::isValid() const { return isValid_; }
-Time TimeParser::getResult() const { return result_; }
-Time TimeParser::getNormalizedResult() const { return normalizeTime(result_); }
-void TimeParser::reset() { result_ = Time(0, 0); isValid_ = false; }
+bool TimeParser::isValid() const {
+	return isValid_;
+}
 
-// Реализации UserInputParser
+Time TimeParser::getResult() const {
+	return result_;
+}
+
+void TimeParser::reset() {
+	result_ = Time(0, 0);
+	isValid_ = false;
+}
+
+// ==================== USER INPUT PARSER ====================
 
 UserInputParser::UserInputParser() : hasPrice_(false), hasTime_(false), price_(0.0), time_(0, 0) {
 	// Инициализируем парсеры
@@ -124,11 +128,6 @@ void UserInputParser::parse(const std::string& input) {
 	}
 }
 
-bool UserInputParser::hasPrice() const { return hasPrice_; }
-bool UserInputParser::hasTime() const { return hasTime_; }
-double UserInputParser::getPrice() const { return price_; }
-Time UserInputParser::getTime() const { return TimeParser::normalizeTime(time_); }
-
 void UserInputParser::reset() {
 	hasPrice_ = false;
 	hasTime_ = false;
@@ -149,4 +148,24 @@ void UserInputParser::handleParsedToken(IParser& parser) {
 			hasPrice_ = true;
 		}
 	}
+}
+
+// Реализации методов, которые были перенесены из заголовочного файла
+bool UserInputParser::hasPrice() const {
+	return hasPrice_;
+}
+
+bool UserInputParser::hasTime() const {
+	return hasTime_;
+}
+
+double UserInputParser::getPrice() const {
+	return price_;
+}
+
+Time UserInputParser::getTime() const {
+	// Используем setTime для нормализации времени
+	Time normalizedTime;
+	normalizedTime.setTime(time_.hours, time_.minutes);
+	return normalizedTime;
 }

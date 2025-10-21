@@ -4,27 +4,33 @@
 
 #include "interfaces.h"
 #include "parsers.h"
-#include "utils.h"
-#include <fstream>
-#include <stdexcept>
+#include <memory>
+#include <regex>
+#include <string>
 
-/// Парсер для файлов с меню
+/// Парсер для файлов с меню с использованием регулярных выражений
 class MenuFileParser : public IFileParser {
 private:
 	std::unique_ptr<NumberParser> numberParser_;
 	std::unique_ptr<TimeParser> timeParser_;
 
+	// Регулярные выражения для проверки форматов
+	std::regex name_pattern_;
+	std::regex time_pattern_;
+	std::regex price_pattern_;
+
 public:
 	MenuFileParser();
 
+	/// Парсит файл с меню и заполняет хранилище
 	void parseFile(const std::string& filename, IMenuStorage& storage, int& invalidCount) override;
 
 private:
-	/// Парсит строку с информацией о блюде
+	/// Парсит строку с информацией о блюде с использованием regex
 	bool parseDishLine(const std::string& line, IMenuStorage& storage);
 
-	/// Извлекает название блюда из кавычек
-	bool extractQuotedName(const std::string& line, std::string& name, std::string& remaining);
+	/// Извлекает значения из строки с помощью regex
+	bool extractValuesWithRegex(const std::string& line, std::string& name, double& price, Time& time);
 };
 
 #endif // FILE_PARSER_H

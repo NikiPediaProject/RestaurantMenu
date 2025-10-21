@@ -14,6 +14,9 @@ public:
 
 	Time(int h = 0, int m = 0);
 
+	/// Устанавливает время с нормализацией
+	void setTime(int h, int m);
+
 	/// Возвращает общее время в минутах
 	int totalMinutes() const;
 
@@ -33,6 +36,9 @@ public:
 
 	Dish(const std::string& n, double p, const Time& t);
 	Dish(const std::string& n, double p, int h, int m);
+
+	/// Устанавливает время приготовления
+	void setTime(int h, int m);
 
 	/// Возвращает время приготовления в минутах
 	int totalMinutes() const;

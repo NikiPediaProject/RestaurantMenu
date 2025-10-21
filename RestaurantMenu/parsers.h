@@ -7,6 +7,7 @@
 #include "utils.h"
 #include <memory>
 #include <sstream>
+#include <vector>
 #include <algorithm>
 
 /// Парсер для числовых значений
@@ -31,17 +32,10 @@ private:
 
 public:
 	TimeParser();
-
-	/// Проверяет корректность времени
 	static bool isValidTime(const Time& time);
-
-	/// Нормализует время (округляет минуты, ограничивает часы)
-	static Time normalizeTime(const Time& time);
-
 	bool parse(const std::string& token) override;
 	bool isValid() const override;
 	Time getResult() const;
-	Time getNormalizedResult() const;
 	void reset() override;
 };
 
