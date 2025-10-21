@@ -18,6 +18,31 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="app.cpp" />
+    <ClCompile Include="builder.cpp" />
+    <ClCompile Include="file_parser.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="models.cpp" />
+    <ClCompile Include="parsers.cpp" />
+    <ClCompile Include="printer.cpp" />
+    <ClCompile Include="storage.cpp" />
+    <ClCompile Include="utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="app.h" />
+    <ClInclude Include="builder.h" />
+    <ClInclude Include="file_parser.h" />
+    <ClInclude Include="interfaces.h" />
+    <ClInclude Include="models.h" />
+    <ClInclude Include="parsers.h" />
+    <ClInclude Include="printer.h" />
+    <ClInclude Include="storage.h" />
+    <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="menu.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{55619A5A-B4AD-42A2-A8B1-F9A58C17A616}</ProjectGuid>
@@ -122,8 +147,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
