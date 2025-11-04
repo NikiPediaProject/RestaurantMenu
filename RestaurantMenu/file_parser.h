@@ -8,6 +8,9 @@
 #include <regex>
 #include <string>
 
+//Функция ручного ввода(без валидации, тип функции void)
+void addMenuItem(IMenuStorage& storage, const std::string& name, double price, const Time& time);
+
 /// Парсер для файлов с меню с использованием регулярных выражений
 class MenuFileParser : public IFileParser {
 private:
