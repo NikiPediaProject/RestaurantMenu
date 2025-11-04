@@ -31,6 +31,7 @@ void RestaurantMenuApp::runInteractive() {
 	std::cout << "- Число (цена) - блюда дешевле указанной суммы" << std::endl;
 	std::cout << "- Время (чч:мм) - блюда, готовящиеся быстрее" << std::endl;
 	std::cout << "- Число и время - комбинированная фильтрация" << std::endl;
+	std::cout << "- 'add' - добавить новое блюдо" << std::endl;
 	std::cout << "Введите 'exit' для выхода" << std::endl;
 
 	while (true) {
@@ -42,6 +43,29 @@ void RestaurantMenuApp::runInteractive() {
 
 		processUserInput(input);
 	}
+}
+
+void RestaurantMenuApp::addNewDish(const std::string& name, double price, const Time& time) {
+    storage_->addDish(name, price, time.hours, time.minutes);
+    std::cout << "Блюдо '" << name << "' успешно добавлено!" << std::endl;
+
+void RestaurantMenuApp::runAddDishInteractive() {
+    std::string name;
+    double price;
+    int hours, minutes;
+    
+    std::cout << "\n=== ДОБАВЛЕНИЕ НОВОГО БЛЮДА ===" << std::endl;
+    std::cout << "Введите название блюда: ";
+    std::getline(std::cin, name);
+    std::cout << "Введите цену: ";
+    std::cin >> price;
+    std::cout << "Введите время приготовления (часы минуты): ";
+    std::cin >> hours >> minutes;
+    
+    // Очищаем буфер после cin
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    
+    addNewDish(name, price, Time(hours, minutes));
 }
 
 void RestaurantMenuApp::processUserInput(const std::string& input) {
