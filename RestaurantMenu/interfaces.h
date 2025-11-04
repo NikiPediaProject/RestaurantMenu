@@ -27,6 +27,8 @@ public:
 	virtual const std::vector<Dish>& getDishes() const = 0;                           ///< Возвращает все блюда
 	virtual size_t getDishesCount() const = 0;                                              ///< Возвращает количество блюд
 	virtual void clear() = 0;                                                               ///< Очищает хранилище
+	virtual bool removeDish(const std::string& name, double price, int hours, int minutes) = 0; ///< Удаляет блюдо
+	virtual void saveToFile(const std::string& filename) const = 0;                       ///< Сохраняет в файл
 };
 
 /// Интерфейс для сортировки меню

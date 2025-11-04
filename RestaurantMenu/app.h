@@ -45,12 +45,27 @@ public:
 	/// Выводит все меню
 	void printMenu() const;
 
-	/// Запускает интерактивный режим фильтрации
+	/// Запускает интерактивный режим управления
 	void runInteractive();
+
+	/// Обрабатывает команды управления
+	void processCommand(const std::string& command);
 
 private:
 	/// Обрабатывает пользовательский ввод для фильтрации
 	void processUserInput(const std::string& input);
+
+	/// Добавляет блюдо
+	void addDish(const std::string& dishData);
+
+	/// Удаляет блюдо
+	void deleteDish(const std::string& dishData);
+
+	/// Сохраняет меню в файл
+	void saveMenu(const std::string& filename) const;
+
+	/// Показывает справку по командам
+	void showHelp() const;
 };
 
 #endif // APP_H

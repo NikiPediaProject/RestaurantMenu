@@ -74,5 +74,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="menu.txt" />
+    <Text Include="test.txt" />
   </ItemGroup>
 </Project>

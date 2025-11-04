@@ -2,10 +2,16 @@
 #include "builder.h"
 #include <iostream>
 #include <locale>
+#include <windows.h>
 
 /// Устанавливает русскую локаль для корректного вывода
 void setRussianLocale() {
+	// Устанавливаем локаль для консоли
 	setlocale(LC_ALL, "Russian");
+
+	// Для Windows устанавливаем кодовую страницу консоли
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
 }
 
 /// Точка входа в приложение
@@ -15,11 +21,6 @@ int main() {
 	try {
 		// Используем билдер вместо фабрики
 		auto app = RestaurantMenuAppBuilder::createDefault();
-
-		// Альтернативный вариант с кастомными настройками:
-		// auto app = RestaurantMenuAppBuilder()
-		//     .setPrinter(std::make_unique<CustomMenuPrinter>()) // если бы был кастомный принтер
-		//     .build();
 
 		app->loadMenu("menu.txt");
 		app->printMenu();

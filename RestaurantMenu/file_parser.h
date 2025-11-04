@@ -25,12 +25,12 @@ public:
 	/// Парсит файл с меню и заполняет хранилище
 	void parseFile(const std::string& filename, IMenuStorage& storage, int& invalidCount) override;
 
+	/// Извлекает значения из строки с помощью regex (публичный метод)
+	bool extractValuesWithRegex(const std::string& line, std::string& name, double& price, Time& time);
+
 private:
 	/// Парсит строку с информацией о блюде с использованием regex
 	bool parseDishLine(const std::string& line, IMenuStorage& storage);
-
-	/// Извлекает значения из строки с помощью regex
-	bool extractValuesWithRegex(const std::string& line, std::string& name, double& price, Time& time);
 };
 
 #endif // FILE_PARSER_H

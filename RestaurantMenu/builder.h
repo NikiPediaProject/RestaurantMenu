@@ -8,6 +8,15 @@
 #include "parsers.h"
 #include "printer.h"
 #include "file_parser.h"
+#include <memory>
+
+// Предварительные объявления
+class MenuStorage;
+class MenuSorter;
+class MenuFilter;
+class MenuPrinter;
+class MenuFileParser;
+class UserInputParser;
 
 /// Билдер для пошагового создания приложения RestaurantMenuApp
 class RestaurantMenuAppBuilder {

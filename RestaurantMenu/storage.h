@@ -4,20 +4,10 @@
 
 #include "interfaces.h"
 #include "models.h"
+#include <fstream>
+#include <iomanip>
 #include <vector>
-#include <algorithm>
-
-/// Хранилище для блюд меню
-class MenuStorage : public IMenuStorage {
-private:
-	std::vector<Dish> dishes_;
-
-public:
-	void addDish(const std::string& name, double price, int hours, int minutes) override;
-	const std::vector<Dish>& getDishes() const override;
-	size_t getDishesCount() const override;
-	void clear() override;
-};
+#include <memory>
 
 /// Реализация сортировки меню
 class MenuSorter : public IMenuSorter {
@@ -34,10 +24,23 @@ private:
 
 public:
 	MenuFilter(std::unique_ptr<IMenuSorter> sorter);
-
 	std::vector<Dish> filterByPrice(const std::vector<Dish>& dishes, double maxPrice) const override;
 	std::vector<Dish> filterByTime(const std::vector<Dish>& dishes, const Time& maxTime) const override;
 	std::vector<Dish> filterByPriceAndTime(const std::vector<Dish>& dishes, double maxPrice, const Time& maxTime) const override;
+};
+
+/// Хранилище для блюд меню
+class MenuStorage : public IMenuStorage {
+private:
+	std::vector<Dish> dishes_;
+
+public:
+	void addDish(const std::string& name, double price, int hours, int minutes) override;
+	const std::vector<Dish>& getDishes() const override;
+	size_t getDishesCount() const override;
+	void clear() override;
+	bool removeDish(const std::string& name, double price, int hours, int minutes) override;
+	void saveToFile(const std::string& filename) const override;
 };
 
 #endif // STORAGE_H

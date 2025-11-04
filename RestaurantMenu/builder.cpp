@@ -1,4 +1,8 @@
 ﻿#include "builder.h"
+#include "storage.h"
+#include "parsers.h"
+#include "printer.h"
+#include "file_parser.h"
 
 // Конструктор билдера
 RestaurantMenuAppBuilder::RestaurantMenuAppBuilder() {
@@ -54,7 +58,7 @@ std::unique_ptr<RestaurantMenuApp> RestaurantMenuAppBuilder::build() {
 		);
 }
 
-// Создание приложения с настройками по умолчанию
+// Создание приложение с настройками по умолчанию
 std::unique_ptr<RestaurantMenuApp> RestaurantMenuAppBuilder::createDefault() {
 	return RestaurantMenuAppBuilder().build();
 }

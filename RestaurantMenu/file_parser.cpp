@@ -4,7 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iostream>
-//Nikita
+
 MenuFileParser::MenuFileParser()
 	: numberParser_(std::make_unique<NumberParser>())
 	, timeParser_(std::make_unique<TimeParser>())

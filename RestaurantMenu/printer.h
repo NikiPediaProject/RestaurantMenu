@@ -14,7 +14,6 @@ public:
 	void printFilteredDishes(const std::vector<Dish>& dishes, const std::string& title) const override;
 
 private:
-	/// Выводит заголовок таблицы
 	void printTableHeader() const;
 };
 
