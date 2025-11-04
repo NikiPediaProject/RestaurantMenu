@@ -8,51 +8,44 @@
 #include "parsers.h"
 #include "printer.h"
 #include "file_parser.h"
-#include <memory>
 
-// Предварительные объявления
-class MenuStorage;
-class MenuSorter;
-class MenuFilter;
-class MenuPrinter;
-class MenuFileParser;
-class UserInputParser;
-
-/// Билдер для пошагового создания приложения RestaurantMenuApp
+/// Строитель для пошагового создания приложения RestaurantMenuApp
+/// Реализует паттерн Builder для удобного конфигурирования сложного объекта
 class RestaurantMenuAppBuilder {
 private:
-	std::unique_ptr<IMenuStorage> storage_;
-	std::unique_ptr<IMenuSorter> sorter_;
-	std::unique_ptr<IMenuFilter> filter_;
-	std::unique_ptr<IMenuPrinter> printer_;
-	std::unique_ptr<IFileParser> fileParser_;
-	std::unique_ptr<UserInputParser> userInputParser_;
+	// Компоненты для сборки приложения
+	std::unique_ptr<IMenuStorage> storage_;             ///< Хранилище данных
+	std::unique_ptr<IMenuSorter> sorter_;               ///< Сортировщик
+	std::unique_ptr<IMenuFilter> filter_;               ///< Фильтр
+	std::unique_ptr<IMenuPrinter> printer_;             ///< Принтер
+	std::unique_ptr<IFileParser> fileParser_;           ///< Парсер файлов
+	std::unique_ptr<UserInputParser> userInputParser_;  ///< Парсер пользовательского ввода
 
 public:
 	RestaurantMenuAppBuilder();
 
-	/// Устанавливает хранилище меню
+	/// Устанавливает пользовательское хранилище меню
 	RestaurantMenuAppBuilder& setStorage(std::unique_ptr<IMenuStorage> storage);
 
-	/// Устанавливает сортировщик меню
+	/// Устанавливает пользовательский сортировщик меню
 	RestaurantMenuAppBuilder& setSorter(std::unique_ptr<IMenuSorter> sorter);
 
-	/// Устанавливает фильтр меню
+	/// Устанавливает пользовательский фильтр меню
 	RestaurantMenuAppBuilder& setFilter(std::unique_ptr<IMenuFilter> filter);
 
-	/// Устанавливает принтер меню
+	/// Устанавливает пользовательский принтер меню
 	RestaurantMenuAppBuilder& setPrinter(std::unique_ptr<IMenuPrinter> printer);
 
-	/// Устанавливает парсер файлов
+	/// Устанавливает пользовательский парсер файлов
 	RestaurantMenuAppBuilder& setFileParser(std::unique_ptr<IFileParser> fileParser);
 
-	/// Устанавливает парсер пользовательского ввода
+	/// Устанавливает пользовательский парсер ввода
 	RestaurantMenuAppBuilder& setUserInputParser(std::unique_ptr<UserInputParser> userInputParser);
 
-	/// Создает и возвращает экземпляр приложения
+	/// Создает и возвращает полностью сконфигурированный экземпляр приложения
 	std::unique_ptr<RestaurantMenuApp> build();
 
-	/// Создает приложение с настройками по умолчанию
+	/// Статический метод для создания приложения с настройками по умолчанию
 	static std::unique_ptr<RestaurantMenuApp> createDefault();
 };
 

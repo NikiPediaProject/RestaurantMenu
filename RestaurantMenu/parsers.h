@@ -10,64 +10,64 @@
 #include <vector>
 #include <algorithm>
 
-/// Парсер для числовых значений
+/// Парсер для числовых значений с поддержкой дробных чисел
 class NumberParser : public IParser {
 private:
-	double result_;
-	bool isValid_;
+	double result_;     ///< Результат успешного парсинга
+	bool isValid_;      ///< Флаг валидности последней операции
 
 public:
 	NumberParser();
+
+	/// Парсит строку в числовое значение, поддерживает запятые и точки как разделители
 	bool parse(const std::string& str) override;
+
+	/// Возвращает true, если последняя операция парсинга была успешной
 	bool isValid() const override;
+
+	/// Возвращает результат парсинга (только если isValid() == true)
 	double getResult() const;
+
+	/// Сбрасывает парсер в начальное состояние
 	void reset() override;
 };
 
-/// Парсер для временных значений формата "чч:мм"
+/// Парсер для временных значений в формате "чч:мм" с автоматической нормализацией
 class TimeParser : public IParser {
 private:
-	Time result_;
-	bool isValid_;
+	Time result_;       ///< Результат успешного парсинга
+	bool isValid_;      ///< Флаг валидности последней операции
 
 public:
 	TimeParser();
+
+	/// Статический метод для проверки валидности объекта Time
 	static bool isValidTime(const Time& time);
+
+	/// Парсит строку в объект Time, поддерживает форматы "чч:мм", "дд:чч:мм" и т.д.
 	bool parse(const std::string& token) override;
+
+	/// Возвращает true, если последняя операция парсинга была успешной
 	bool isValid() const override;
+
+	/// Возвращает результат парсинга (только если isValid() == true)
 	Time getResult() const;
+
+	/// Сбрасывает парсер в начальное состояние
 	void reset() override;
 };
 
-/// Парсер пользовательского ввода для фильтрации
+/// Композитный парсер для обработки пользовательского ввода в интерактивном режиме
 class UserInputParser {
 private:
-	std::vector<std::unique_ptr<IParser>> parsers_;
-	bool hasPrice_;
-	bool hasTime_;
-	double price_;
-	Time time_;
+	std::unique_ptr<TimeParser> timeParser_;    ///< Парсер для временных значений
+	std::unique_ptr<NumberParser> numberParser_; ///< Парсер для числовых значений
 
 public:
 	UserInputParser();
 
-	/// Добавляет новый парсер в цепочку
-	void addParser(std::unique_ptr<IParser> parser);
-
-	/// Парсит пользовательский ввод для извлечения критериев фильтрации
-	void parse(const std::string& input);
-
-	bool hasPrice() const;
-	bool hasTime() const;
-	double getPrice() const;
-	Time getTime() const;
-
-private:
-	/// Сбрасывает состояние парсера
-	void reset();
-
-	/// Обрабатывает успешно распарсенный токен
-	void handleParsedToken(IParser& parser);
+	/// Анализирует пользовательский ввод и извлекает критерии фильтрации (цена и/или время)
+	bool parse(const std::string& input, double& price, Time& time);
 };
 
 #endif // PARSERS_H
