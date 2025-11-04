@@ -48,6 +48,12 @@ public:
 	/// Запускает интерактивный режим фильтрации
 	void runInteractive();
 
+    /// Добавляет новое блюдо в меню
+    void addNewDish(const std::string& name, double price, const Time& time);
+    
+    /// Запускает интерактивный режим добавления блюда
+    void runAddDishInteractive();
+
 private:
 	/// Обрабатывает пользовательский ввод для фильтрации
 	void processUserInput(const std::string& input);
