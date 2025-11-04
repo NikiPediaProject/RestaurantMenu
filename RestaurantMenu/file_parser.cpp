@@ -4,7 +4,17 @@
 #include <sstream>
 #include <algorithm>
 #include <iostream>
-//Nikita
+
+//Функция ручного ввода(без валидации, с типом void)
+
+void MenuFileParser::addMenuItem(IMenuStorage& storage, const std::string& name, double price, const Time& time) {
+    // Простая версия без валидации
+    if (!name.empty() && price > 0) {
+        storage.addDish(name, price, time.hours, time.minutes);
+        std::cout << "Блюдо добавлено: " << name << std::endl;
+    }
+}
+
 MenuFileParser::MenuFileParser()
 	: numberParser_(std::make_unique<NumberParser>())
 	, timeParser_(std::make_unique<TimeParser>())
