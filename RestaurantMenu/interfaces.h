@@ -5,8 +5,9 @@
 #include <vector>
 #include <string>
 
-// Предварительное объявление класса Dish
+// Предварительные объявления для уменьшения зависимости от заголовков
 class Dish;
+class Time;
 
 // ==================== ИНТЕРФЕЙСЫ ====================
 
@@ -14,52 +15,90 @@ class Dish;
 class IParser {
 public:
 	virtual ~IParser() = default;
-	virtual bool parse(const std::string& input) = 0;  ///< Парсит входную строку
-	virtual bool isValid() const = 0;                  ///< Проверяет валидность результата
-	virtual void reset() = 0;                          ///< Сбрасывает состояние парсера
+
+	/// Парсит входную строку и возвращает результат операции
+	virtual bool parse(const std::string& input) = 0;
+
+	/// Проверяет валидность результата последней операции парсинга
+	virtual bool isValid() const = 0;
+
+	/// Сбрасывает состояние парсера к начальному
+	virtual void reset() = 0;
 };
 
-/// Интерфейс для хранения меню
+/// Интерфейс для хранения данных меню
 class IMenuStorage {
 public:
 	virtual ~IMenuStorage() = default;
-	virtual void addDish(const std::string& name, double price, int hours, int minutes) = 0; ///< Добавляет блюдо
-	virtual const std::vector<Dish>& getDishes() const = 0;                           ///< Возвращает все блюда
-	virtual size_t getDishesCount() const = 0;                                              ///< Возвращает количество блюд
-	virtual void clear() = 0;                                                               ///< Очищает хранилище
+
+	/// Добавляет новое блюдо в хранилище
+	virtual void addDish(const std::string& name, double price, const Time& time) = 0;
+
+	/// Возвращает константную ссылку на вектор всех блюд
+	virtual const std::vector<Dish>& getDishes() const = 0;
+
+	/// Возвращает общее количество блюд в хранилище
+	virtual size_t getDishesCount() const = 0;
+
+	/// Полностью очищает хранилище
+	virtual void clear() = 0;
+
+	/// Удаляет конкретное блюдо по всем параметрам
+	virtual bool removeDish(const std::string& name, double price, const Time& time) = 0;
+
+	/// Сохраняет все блюда в указанный файл
+	virtual void saveToFile(const std::string& filename) const = 0;
 };
 
-/// Интерфейс для сортировки меню
+/// Интерфейс для сортировки блюд меню
 class IMenuSorter {
 public:
 	virtual ~IMenuSorter() = default;
-	virtual void sortAlphabetically(std::vector<Dish>& dishes) const = 0;   ///< Сортирует по алфавиту
-	virtual void sortByPriceDesc(std::vector<Dish>& dishes) const = 0;      ///< Сортирует по убыванию цены
-	virtual void sortByTimeAsc(std::vector<Dish>& dishes) const = 0;        ///< Сортирует по возрастанию времени
+
+	/// Сортирует блюда в алфавитном порядке по названию
+	virtual void sortAlphabetically(std::vector<Dish>& dishes) const = 0;
+
+	/// Сортирует блюда по убыванию цены (от самой дорогой к самой дешевой)
+	virtual void sortByPriceDesc(std::vector<Dish>& dishes) const = 0;
+
+	/// Сортирует блюда по возрастанию времени приготовления
+	virtual void sortByTimeAsc(std::vector<Dish>& dishes) const = 0;
 };
 
-/// Интерфейс для фильтрации меню
+/// Интерфейс для фильтрации блюд меню
 class IMenuFilter {
 public:
 	virtual ~IMenuFilter() = default;
-	virtual std::vector<Dish> filterByPrice(const std::vector<Dish>& dishes, double maxPrice) const = 0; ///< Фильтрует по цене
-	virtual std::vector<Dish> filterByTime(const std::vector<Dish>& dishes, const class Time& maxTime) const = 0; ///< Фильтрует по времени
-	virtual std::vector<Dish> filterByPriceAndTime(const std::vector<Dish>& dishes, double maxPrice, const class Time& maxTime) const = 0; ///< Фильтрует по цене и времени
+
+	/// Фильтрует блюда по максимальной цене (включительно)
+	virtual std::vector<Dish> filterByPrice(const std::vector<Dish>& dishes, double maxPrice) const = 0;
+
+	/// Фильтрует блюда по максимальному времени приготовления
+	virtual std::vector<Dish> filterByTime(const std::vector<Dish>& dishes, const Time& maxTime) const = 0;
+
+	/// Фильтрует блюда одновременно по цене и времени приготовления
+	virtual std::vector<Dish> filterByPriceAndTime(const std::vector<Dish>& dishes, double maxPrice, const Time& maxTime) const = 0;
 };
 
-/// Интерфейс для вывода меню
+/// Интерфейс для вывода информации о меню
 class IMenuPrinter {
 public:
 	virtual ~IMenuPrinter() = default;
-	virtual void printAllDishes(const std::vector<Dish>& dishes, int invalidCount) const = 0;     ///< Выводит все блюда
-	virtual void printFilteredDishes(const std::vector<Dish>& dishes, const std::string& title) const = 0; ///< Выводит отфильтрованные блюда
+
+	/// Выводит все блюда меню с статистикой невалидных записей
+	virtual void printAllDishes(const std::vector<Dish>& dishes, int invalidCount) const = 0;
+
+	/// Выводит отфильтрованные блюда с пользовательским заголовком
+	virtual void printFilteredDishes(const std::vector<Dish>& dishes, const std::string& title) const = 0;
 };
 
-/// Интерфейс для парсинга файлов
+/// Интерфейс для парсинга файлов с меню
 class IFileParser {
 public:
 	virtual ~IFileParser() = default;
-	virtual void parseFile(const std::string& filename, IMenuStorage& storage, int& invalidCount) = 0; ///< Парсит файл с меню
+
+	/// Парсит файл с меню и заполняет хранилище, подсчитывая невалидные строки
+	virtual void parseFile(const std::string& filename, IMenuStorage& storage, int& invalidCount) = 0;
 };
 
 #endif // INTERFACES_H

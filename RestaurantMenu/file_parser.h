@@ -8,32 +8,29 @@
 #include <regex>
 #include <string>
 
-//Функция ручного ввода(без валидации, тип функции void)
-void addMenuItem(IMenuStorage& storage, const std::string& name, double price, const Time& time);
-
-/// Парсер для файлов с меню с использованием регулярных выражений
+/// Парсер файлов меню с использованием регулярных выражений для надежного разбора
 class MenuFileParser : public IFileParser {
 private:
-	std::unique_ptr<NumberParser> numberParser_;
-	std::unique_ptr<TimeParser> timeParser_;
+	std::unique_ptr<NumberParser> numberParser_;    ///< Парсер для цен
+	std::unique_ptr<TimeParser> timeParser_;        ///< Парсер для времени
 
-	// Регулярные выражения для проверки форматов
-	std::regex name_pattern_;
-	std::regex time_pattern_;
-	std::regex price_pattern_;
+	// Регулярные выражения для различных компонентов строки меню
+	std::regex name_pattern_;   ///< Шаблон для извлечения названия в кавычках
+	std::regex time_pattern_;   ///< Шаблон для извлечения времени в формате чч:мм
+	std::regex price_pattern_;  ///< Шаблон для извлечения числовых цен
 
 public:
 	MenuFileParser();
 
-	/// Парсит файл с меню и заполняет хранилище
+	/// Парсит файл с меню, заполняет хранилище и подсчитывает невалидные строки
 	void parseFile(const std::string& filename, IMenuStorage& storage, int& invalidCount) override;
 
-private:
-	/// Парсит строку с информацией о блюде с использованием regex
-	bool parseDishLine(const std::string& line, IMenuStorage& storage);
-
-	/// Извлекает значения из строки с помощью regex
+	/// Публичный метод для извлечения значений из строки с помощью regex
 	bool extractValuesWithRegex(const std::string& line, std::string& name, double& price, Time& time);
+
+private:
+	/// Внутренний метод для парсинга отдельной строки с информацией о блюде
+	bool parseDishLine(const std::string& line, IMenuStorage& storage);
 };
 
 #endif // FILE_PARSER_H

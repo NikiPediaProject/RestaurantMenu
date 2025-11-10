@@ -7,14 +7,17 @@
 #include <iomanip>
 #include <iostream>
 
-/// Реализация вывода меню в консоль
+/// Реализация вывода меню в табличном формате в консоль
 class MenuPrinter : public IMenuPrinter {
 public:
+	/// Выводит полное меню с заголовком и статистикой
 	void printAllDishes(const std::vector<Dish>& dishes, int invalidCount) const override;
+
+	/// Выводит отфильтрованные блюда с пользовательским заголовком
 	void printFilteredDishes(const std::vector<Dish>& dishes, const std::string& title) const override;
 
 private:
-	/// Выводит заголовок таблицы
+	/// Вспомогательный метод для вывода заголовка таблицы
 	void printTableHeader() const;
 };
 
