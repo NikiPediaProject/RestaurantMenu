@@ -1,36 +1,33 @@
 ﻿#include "parsers.h"
+#include <algorithm>
 
-// ==================== РЕАЛИЗАЦИЯ NUMBER PARSER ====================
+// ==================== NUMBER PARSER ====================
 
-/// Конструктор парсера чисел - инициализирует состояние
+// Конструктор парсера чисел
 NumberParser::NumberParser() : result_(0.0), isValid_(false) {}
 
-/// Парсит строку в числовое значение с поддержкой дробных чисел и заменой запятых
+// Парсит строку в числовое значение
 bool NumberParser::parse(const std::string& str) {
-	reset(); // Сбрасываем предыдущее состояние
-
+	reset();
 	if (str.empty()) return false;
 
 	std::string numberStr = str;
-
-	// Заменяем запятые на точки для унификации формата дробных чисел
+	// Заменяем запятые на точки для корректного парсинга
 	for (char& c : numberStr) {
 		if (c == ',') c = '.';
 	}
 
-	// Проверяем, что строка содержит только допустимые символы
+	// Проверяем допустимые символы
 	for (char c : numberStr) {
 		if (!StringUtils::isDigitASCII(c) && c != '.' && c != '-') {
 			return false;
 		}
 	}
 
-	// Используем stringstream для преобразования строки в число
 	std::stringstream ss(numberStr);
 	double value;
 	ss >> value;
 
-	// Проверяем успешность преобразования и полное потребление строки
 	if (ss.fail() || !ss.eof()) return false;
 
 	result_ = value;
@@ -38,48 +35,42 @@ bool NumberParser::parse(const std::string& str) {
 	return true;
 }
 
-/// Возвращает статус валидности последней операции парсинга
+// Проверяет валидность результата
 bool NumberParser::isValid() const {
 	return isValid_;
 }
 
-/// Возвращает результат успешного парсинга (только при isValid() == true)
+// Возвращает результат парсинга
 double NumberParser::getResult() const {
 	return result_;
 }
 
-/// Сбрасывает парсер в начальное состояние
+// Сбрасывает парсер в начальное состояние
 void NumberParser::reset() {
 	result_ = 0.0;
 	isValid_ = false;
 }
 
-// ==================== РЕАЛИЗАЦИЯ TIME PARSER ====================
+// ==================== TIME PARSER ====================
 
-/// Конструктор парсера времени - инициализирует нулевым временем
+// Конструктор парсера времени
 TimeParser::TimeParser() : result_(0, 0), isValid_(false) {}
 
-/// Статический метод для проверки валидности объекта Time
+// Проверяет валидность объекта Time
 bool TimeParser::isValidTime(const Time& time) {
-	// Разрешаем любые неотрицательные значения - нормализация преобразует их корректно
 	return time.getHours() >= 0 && time.getMinutes() >= 0;
 }
 
-/// Парсит строку времени в формате "чч:мм" с автоматической нормализацией
+// Парсит строку в объект Time
 bool TimeParser::parse(const std::string& token) {
-	reset(); // Сбрасываем предыдущее состояние
-
+	reset();
 	std::string timeStr = StringUtils::trim(token);
-
-	// Удаляем все пробелы для обработки форматов типа "12 : 30"
 	timeStr.erase(std::remove(timeStr.begin(), timeStr.end(), ' '), timeStr.end());
 
-	// Ищем разделитель - двоеточие
 	size_t colonPos = timeStr.find(':');
 	if (colonPos == std::string::npos) return false;
 
 	try {
-		// Извлекаем компоненты часа и минуты
 		std::string hourStr = timeStr.substr(0, colonPos);
 		std::string minStr = timeStr.substr(colonPos + 1);
 
@@ -88,11 +79,10 @@ bool TimeParser::parse(const std::string& token) {
 			return false;
 		}
 
-		// Преобразуем строки в числа
 		int h = std::stoi(hourStr);
 		int m = std::stoi(minStr);
 
-		// Создаем временный объект Time - конструктор выполнит нормализацию
+		// Создаем Time - он сам выполнит нормализацию
 		Time tempTime(h, m);
 		if (isValidTime(tempTime)) {
 			result_ = tempTime;
@@ -101,50 +91,49 @@ bool TimeParser::parse(const std::string& token) {
 		}
 	}
 	catch (...) {
-		// Ловим любые исключения при преобразовании строк в числа
 		return false;
 	}
 	return false;
 }
 
-/// Возвращает статус валидности последней операции парсинга
+// Проверяет валидность результата
 bool TimeParser::isValid() const {
 	return isValid_;
 }
 
-/// Возвращает результат успешного парсинга (только при isValid() == true)
+// Возвращает результат парсинга
 Time TimeParser::getResult() const {
 	return result_;
 }
 
-/// Сбрасывает парсер в начальное состояние
+// Сбрасывает парсер в начальное состояние
 void TimeParser::reset() {
 	result_ = Time(0, 0);
 	isValid_ = false;
 }
 
-// ==================== РЕАЛИЗАЦИЯ USER INPUT PARSER ====================
+// ==================== USER INPUT PARSER ====================
 
-/// Конструктор композитного парсера - создает дочерние парсеры
+// Конструктор парсера пользовательского ввода
 UserInputParser::UserInputParser()
 	: timeParser_(std::make_unique<TimeParser>())
 	, numberParser_(std::make_unique<NumberParser>())
 {}
 
-/// Анализирует пользовательский ввод и извлекает критерии фильтрации
+// Анализирует пользовательский ввод и извлекает критерии фильтрации
 bool UserInputParser::parse(const std::string& input, double& price, Time& time) {
 	std::istringstream iss(input);
 	std::string token;
 	bool hasPrice = false;
 	bool hasTime = false;
 
-	// Обрабатываем каждый токен входной строки последовательно
+	// Обрабатываем каждый токен входной строки
 	while (iss >> token) {
 		// Сначала пробуем распарсить как время
 		if (!hasTime && timeParser_->parse(token)) {
 			time = timeParser_->getResult();
 			hasTime = true;
-			continue; // Переходим к следующему токену
+			continue;
 		}
 
 		// Затем пробуем распарсить как цену
@@ -154,6 +143,5 @@ bool UserInputParser::parse(const std::string& input, double& price, Time& time)
 		}
 	}
 
-	// Возвращаем true если найден хотя бы один критерий фильтрации
 	return hasPrice || hasTime;
 }

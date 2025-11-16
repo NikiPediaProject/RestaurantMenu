@@ -7,8 +7,6 @@
 #include "utils.h"
 #include <memory>
 #include <sstream>
-#include <vector>
-#include <algorithm>
 
 /// Парсер для числовых значений с поддержкой дробных чисел
 class NumberParser : public IParser {

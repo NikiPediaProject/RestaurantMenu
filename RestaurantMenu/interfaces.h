@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 // Предварительные объявления для уменьшения зависимости от заголовков
 class Dish;

@@ -4,8 +4,8 @@
 
 #include "interfaces.h"
 #include "models.h"
-#include <iomanip>
 #include <iostream>
+#include <iomanip>
 
 /// Реализация вывода меню в табличном формате в консоль
 class MenuPrinter : public IMenuPrinter {

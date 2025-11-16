@@ -8,7 +8,7 @@
 #include <regex>
 #include <string>
 
-/// Парсер файлов меню с использованием регулярных выражений для надежного разбора
+/// Парсер файлов меню с использованием регулярных выражений
 class MenuFileParser : public IFileParser {
 private:
 	std::unique_ptr<NumberParser> numberParser_;    ///< Парсер для цен

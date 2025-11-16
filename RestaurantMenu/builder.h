@@ -3,14 +3,9 @@
 #define BUILDER_H
 
 #include "app.h"
-#include "interfaces.h"
-#include "storage.h"
-#include "parsers.h"
-#include "printer.h"
-#include "file_parser.h"
+#include <memory>
 
 /// Строитель для пошагового создания приложения RestaurantMenuApp
-/// Реализует паттерн Builder для удобного конфигурирования сложного объекта
 class RestaurantMenuAppBuilder {
 private:
 	// Компоненты для сборки приложения

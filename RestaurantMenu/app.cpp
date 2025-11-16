@@ -3,12 +3,10 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include <memory>
-#include <string>
+#include <iomanip>
+#include <cstdlib> // Для system()
 
-// ==================== РЕАЛИЗАЦИЯ RESTAURANT MENU APP ====================
-
-/// Конструктор с инъекцией зависимостей (Dependency Injection pattern)
+// Конструктор с инъекцией зависимостей
 RestaurantMenuApp::RestaurantMenuApp(
 	std::unique_ptr<IMenuStorage> storage,
 	std::unique_ptr<IMenuSorter> sorter,
@@ -24,44 +22,58 @@ RestaurantMenuApp::RestaurantMenuApp(
 	, userInputParser_(std::move(userInputParser))
 	, invalidCount_(0) {}
 
-/// Загружает меню из файла, парсит данные и автоматически сортирует по алфавиту
+// Загружает меню из указанного файла
 void RestaurantMenuApp::loadMenu(const std::string& filename) {
+	// Очищаем предыдущее меню перед загрузкой нового
+	clearMenu();
 	fileParser_->parseFile(filename, *storage_, invalidCount_);
 	sorter_->sortAlphabetically(const_cast<std::vector<Dish>&>(storage_->getDishes()));
 }
 
-/// Выводит полное меню ресторана в консоль в табличном формате
+// Очищает текущее загруженное меню
+void RestaurantMenuApp::clearMenu() {
+	storage_->clear();
+	invalidCount_ = 0;
+}
+
+// Выводит полное меню в консоль
 void RestaurantMenuApp::printMenu() const {
 	printer_->printAllDishes(storage_->getDishes(), invalidCount_);
 }
 
-/// Запускает основной интерактивный цикл управления меню
+// Запускает интерактивный режим управления меню
 void RestaurantMenuApp::runInteractive() {
 	std::string input;
-	std::cout << std::endl << "=== РЕЖИМ УПРАВЛЕНИЯ МЕНЮ ===" << std::endl;
+	std::cout << std::endl << "=== ИНТЕРАКТИВНЫЙ РЕЖИМ УПРАВЛЕНИЯ ===" << std::endl;
+	std::cout << "Для возврата к выбору файла введите 'exit'" << std::endl;
 	showHelp();
 
-	// Основной цикл обработки команд
 	while (true) {
 		std::cout << std::endl << "Введите команду: ";
 		std::getline(std::cin, input);
 
-		if (input == "exit") break;
+		if (input == "exit") {
+			std::cout << "Выход из интерактивного режима..." << std::endl;
+			break;
+		}
 
 		processCommand(input);
 	}
 }
 
-/// Обрабатывает одну команду пользователя (маршрутизатор команд)
+// Обрабатывает введенную пользователем команду
 void RestaurantMenuApp::processCommand(const std::string& command) {
 	if (command.empty()) return;
 
-	// Проверяем специальные команды управления
+	// Проверяем специальные команды
 	if (command == "help") {
 		showHelp();
 	}
 	else if (command == "print") {
 		printMenu();
+	}
+	else if (command == "clear") {
+		clearConsole();
 	}
 	else if (command.substr(0, 4) == "add ") {
 		addDish(command.substr(4));
@@ -73,19 +85,19 @@ void RestaurantMenuApp::processCommand(const std::string& command) {
 		saveMenu(command.substr(5));
 	}
 	else {
-		// Если это не команда управления, пытаемся обработать как критерии фильтрации
+		// Если это не команда, пытаемся обработать как критерии фильтрации
 		processUserInput(command);
 	}
 }
 
-/// Обрабатывает пользовательский ввод как критерии фильтрации меню
+// Обрабатывает пользовательский ввод для фильтрации меню
 void RestaurantMenuApp::processUserInput(const std::string& input) {
 	double price = 0.0;
 	Time time;
 
 	if (userInputParser_->parse(input, price, time)) {
 		if (price > 0 && time.totalMinutes() > 0) {
-			// Фильтрация одновременно по цене и времени
+			// Комбинированная фильтрация по цене и времени
 			auto filtered = filter_->filterByPriceAndTime(storage_->getDishes(), price, time);
 			std::stringstream priceStream;
 			priceStream << std::fixed << std::setprecision(2) << price;
@@ -114,9 +126,9 @@ void RestaurantMenuApp::processUserInput(const std::string& input) {
 	}
 }
 
-/// Добавляет новое блюдо в меню с валидацией данных
+// Добавляет новое блюдо в меню
 void RestaurantMenuApp::addDish(const std::string& dishData) {
-	// Создаем временный парсер для извлечения значений из строки
+	// Создаем временный парсер для извлечения значений
 	MenuFileParser parser;
 	std::string name;
 	double price = 0.0;
@@ -124,30 +136,29 @@ void RestaurantMenuApp::addDish(const std::string& dishData) {
 
 	if (parser.extractValuesWithRegex(dishData, name, price, time)) {
 		if (price <= 0) {
-			std::cout << "Ошибка: цена должна быть положительной!" << std::endl;
+			std::cout << "ERROR: цена должна быть положительной!" << std::endl;
 			return;
 		}
 
-		// Передаём полный объект Time в хранилище
+		// Передаём полный объект Time
 		storage_->addDish(name, price, time);
 		std::cout << "Блюдо добавлено: " << name << " (цена: " << price << ", время: " << time.toString() << ")" << std::endl;
 
-		// Пересортируем меню для поддержания порядка
+		// Пересортируем меню по алфавиту
 		sorter_->sortAlphabetically(const_cast<std::vector<Dish>&>(storage_->getDishes()));
 	}
 	else {
-		std::cout << "Ошибка: неверный формат данных! Используйте: \"Название блюда\" цена время" << std::endl;
-		std::cout << "Пример: add \"Пицца Маргарита\" 12.50 00:30" << std::endl;
+		std::cout << "ERROR: неверный формат данных! Используйте: \"Название блюда\" цена время" << std::endl;
 	}
 }
 
-/// Удаляет блюдо из меню (по названию или полному совпадению)
+// Удаляет блюдо из меню
 void RestaurantMenuApp::deleteDish(const std::string& dishData) {
 	std::string trimmedData = dishData;
 
-	// Проверяем, есть ли кавычки в данных для определения стратегии удаления
+	// Проверяем, есть ли кавычки в данных
 	if (dishData.find('"') == std::string::npos) {
-		// Если кавычек нет - удаляем все блюда с таким названием
+		// Если кавычек нет, удаляем только по названию
 		std::string name = dishData;
 		size_t removedCount = storage_->getDishesCount();
 
@@ -170,11 +181,11 @@ void RestaurantMenuApp::deleteDish(const std::string& dishData) {
 			std::cout << "Удалено блюд с названием \"" << name << "\": " << (removedCount - newCount) << std::endl;
 		}
 		else {
-			std::cout << "Блюда с названием \"" << name << "\" не найдены" << std::endl;
+			std::cout << "WARNING: Блюда с названием \"" << name << "\" не найдены" << std::endl;
 		}
 	}
 	else {
-		// Если есть кавычки - используем точное удаление по всем параметрам
+		// Если есть кавычки, используем полный парсинг
 		MenuFileParser parser;
 		std::string name;
 		double price = 0.0;
@@ -185,19 +196,19 @@ void RestaurantMenuApp::deleteDish(const std::string& dishData) {
 				std::cout << "Блюдо удалено: " << name << std::endl;
 			}
 			else {
-				std::cout << "Блюдо не найдено: " << name << std::endl;
+				std::cout << "WARNING: Блюдо не найдено: " << name << std::endl;
 			}
 		}
 		else {
-			std::cout << "Ошибка: неверный формат данных! Используйте: delete \"Название блюда\" или delete \"Название\" цена время" << std::endl;
+			std::cout << "ERROR: неверный формат данных! Используйте: delete <Название блюда> или delete \"Название\" цена время" << std::endl;
 		}
 	}
 }
 
-/// Сохраняет текущее меню в файл с подтверждением перезаписи
+// Сохраняет текущее меню в файл
 void RestaurantMenuApp::saveMenu(const std::string& filename) const {
 	if (filename == "menu.txt") {
-		std::cout << "Внимание: вы пытаетесь сохранить в файл menu.txt. Это перезапишет исходный файл меню." << std::endl;
+		std::cout << "WARNING: вы пытаетесь сохранить в файл menu.txt. Это перезапишет исходный файл меню." << std::endl;
 		std::cout << "Продолжить? (y/n): ";
 
 		std::string answer;
@@ -214,19 +225,28 @@ void RestaurantMenuApp::saveMenu(const std::string& filename) const {
 		std::cout << "Меню успешно сохранено в файл: " << filename << std::endl;
 	}
 	catch (const std::exception& e) {
-		std::cout << "Ошибка при сохранении: " << e.what() << std::endl;
+		std::cout << "ERROR: Ошибка при сохранении: " << e.what() << std::endl;
 	}
 }
 
-/// Выводит справочную информацию по доступным командам
+// Очищает консоль
+void RestaurantMenuApp::clearConsole() const {
+	system("cls");
+}
+
+// Показывает справку по доступным командам
 void RestaurantMenuApp::showHelp() const {
-	std::cout << "Доступные команды:" << std::endl;
+	std::cout << std::endl << "ДОСТУПНЫЕ КОМАНДЫ:" << std::endl;
+	std::cout << "  help                         - показать эту справку" << std::endl;
+	std::cout << "  print                        - вывести меню" << std::endl;
+	std::cout << "  clear                        - очистить консоль" << std::endl;
 	std::cout << "  add \"Название\" цена время    - добавить блюдо" << std::endl;
 	std::cout << "  delete Название              - удалить все блюда с таким названием" << std::endl;
 	std::cout << "  delete \"Название\" цена время - удалить конкретное блюдо" << std::endl;
 	std::cout << "  save имя_файла               - сохранить меню в файл" << std::endl;
-	std::cout << "  print                        - вывести меню" << std::endl;
-	std::cout << "  help                         - показать эту справку" << std::endl;
-	std::cout << "  exit                         - выйти из программы" << std::endl;
-	std::cout << "  цена [время]                 - фильтрация по цене и/или времени" << std::endl;
+	std::cout << "  exit                         - выйти в меню выбора файла" << std::endl;
+	std::cout << std::endl << "ФИЛЬТРАЦИЯ:" << std::endl;
+	std::cout << "  цена                         - блюда дешевле указанной суммы" << std::endl;
+	std::cout << "  время (чч:мм)                - блюда, готовящиеся быстрее" << std::endl;
+	std::cout << "  цена время                   - комбинированная фильтрация" << std::endl;
 }

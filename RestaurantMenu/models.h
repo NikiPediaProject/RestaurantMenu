@@ -3,13 +3,11 @@
 #define MODELS_H
 
 #include <string>
-#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <ctime>
 
 /// Класс для представления времени с поддержкой часов, минут, дней и лет
-/// Автоматически нормализует значения (например, 65 минут -> 1 час 5 минут)
 class Time {
 private:
 	std::tm time_;              ///< Внутреннее представление времени в структуре tm
