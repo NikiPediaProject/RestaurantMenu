@@ -41,8 +41,7 @@
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="menu.txt" />
-    <Text Include="test.txt" />
+    <Text Include="..\menu.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

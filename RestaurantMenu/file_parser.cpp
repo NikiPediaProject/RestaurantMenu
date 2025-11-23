@@ -92,7 +92,13 @@ bool MenuFileParser::extractValuesWithRegex(const std::string& line, std::string
 		std::cout << "- Не найдено название в кавычках" << std::endl;
 		return false;
 	}
-	name = nameResult;
+
+	// Обрезаем пробелы в названии и проверяем что оно не пустое
+	name = StringUtils::trim(nameResult);
+	if (name.empty()) {
+		std::cout << "- Отсеяно: название блюда не может быть пустым" << std::endl;
+		return false;
+	}
 
 	if (!findAndExtractValue(workingLine, time_pattern_, timeResult)) {
 		std::cout << "- Не найдено время в формате чч:мм" << std::endl;
@@ -106,14 +112,14 @@ bool MenuFileParser::extractValuesWithRegex(const std::string& line, std::string
 
 	// Парсим время
 	if (!timeParser_->parse(timeResult)) {
-		std::cout << "- Ошибка парсинга времени: " << timeResult << std::endl;
+		std::cout << "- Ошибка парсинга времени: " << timeParser_->getErrorMessage() << std::endl;
 		return false;
 	}
 	time = timeParser_->getResult();
 
 	// Парсим цену
 	if (!numberParser_->parse(priceResult)) {
-		std::cout << "- Ошибка парсинга цены: " << priceResult << std::endl;
+		std::cout << "- Ошибка парсинга цены: " << numberParser_->getErrorMessage() << std::endl;
 		return false;
 	}
 	price = numberParser_->getResult();

@@ -4,11 +4,12 @@ A comprehensive C++ application for managing restaurant menus with full Google T
 
 ## Project Structure
 
-RestaurantMenu/
-├── RestaurantMenu/ # Main application project
-├── RestaurantMenuTests/ # Test project with Google Test
-├── lib/googletest-main/ # Google Test framework
-└── menu.txt # Sample menu file
+*RestaurantMenu/
+-├── RestaurantMenu/ # Main application project
+-├── RestaurantMenuTests/ # Test project with Google Test
+-├── lib/googletest-main/ # Google Test framework
+-└── menu.txt # Sample menu file
+
 
 ## Building and Running
 
@@ -31,15 +32,17 @@ RestaurantMenu/
 - MenuStorage CRUD operations
 - MenuSorter algorithms
 - FileParser regex extraction
+- Dish name validation
 
 ## Features
 
 - Load menu from text files
 - Interactive command interface
-- Add/delete dishes
+- Add/delete dishes with validation
 - Filter by price and time
 - Save menus to files
 - Comprehensive unit testing
+- Dish name validation (non-empty after trimming)
 
 ## Commands
 

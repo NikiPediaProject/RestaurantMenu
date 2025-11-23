@@ -3,13 +3,14 @@
 
 // ==================== NUMBER PARSER ====================
 
-// Конструктор парсера чисел
-NumberParser::NumberParser() : result_(0.0), isValid_(false) {}
+NumberParser::NumberParser() : result_(0.0), isValid_(false), errorMessage_("") {}
 
-// Парсит строку в числовое значение
 bool NumberParser::parse(const std::string& str) {
 	reset();
-	if (str.empty()) return false;
+	if (str.empty()) {
+		errorMessage_ = "Ошибка: пустая строка";
+		return false;
+	}
 
 	std::string numberStr = str;
 	// Заменяем запятые на точки для корректного парсинга
@@ -20,6 +21,7 @@ bool NumberParser::parse(const std::string& str) {
 	// Проверяем допустимые символы
 	for (char c : numberStr) {
 		if (!StringUtils::isDigitASCII(c) && c != '.' && c != '-') {
+			errorMessage_ = "Ошибка: строка содержит недопустимые символы";
 			return false;
 		}
 	}
@@ -28,47 +30,57 @@ bool NumberParser::parse(const std::string& str) {
 	double value;
 	ss >> value;
 
-	if (ss.fail() || !ss.eof()) return false;
+	if (ss.fail() || !ss.eof()) {
+		errorMessage_ = "Ошибка: не удалось преобразовать в число";
+		return false;
+	}
 
 	result_ = value;
 	isValid_ = true;
 	return true;
 }
 
-// Проверяет валидность результата
 bool NumberParser::isValid() const {
 	return isValid_;
 }
 
-// Возвращает результат парсинга
 double NumberParser::getResult() const {
 	return result_;
 }
 
-// Сбрасывает парсер в начальное состояние
+std::string NumberParser::getErrorMessage() const {
+	return errorMessage_;
+}
+
 void NumberParser::reset() {
 	result_ = 0.0;
 	isValid_ = false;
+	errorMessage_ = "";
 }
 
 // ==================== TIME PARSER ====================
 
-// Конструктор парсера времени
-TimeParser::TimeParser() : result_(0, 0), isValid_(false) {}
+TimeParser::TimeParser() : result_(0, 0), isValid_(false), errorMessage_("") {}
 
-// Проверяет валидность объекта Time
 bool TimeParser::isValidTime(const Time& time) {
-	return time.getHours() >= 0 && time.getMinutes() >= 0;
+	return time.getHours() >= 0 && time.getMinutes() >= 0 && time.getMinutes() < 60;
 }
 
-// Парсит строку в объект Time
 bool TimeParser::parse(const std::string& token) {
 	reset();
 	std::string timeStr = StringUtils::trim(token);
 	timeStr.erase(std::remove(timeStr.begin(), timeStr.end(), ' '), timeStr.end());
 
+	if (timeStr.empty()) {
+		errorMessage_ = "Ошибка: пустая строка времени";
+		return false;
+	}
+
 	size_t colonPos = timeStr.find(':');
-	if (colonPos == std::string::npos) return false;
+	if (colonPos == std::string::npos) {
+		errorMessage_ = "Ошибка: отсутствует двоеточие в формате времени";
+		return false;
+	}
 
 	try {
 		std::string hourStr = timeStr.substr(0, colonPos);
@@ -76,11 +88,18 @@ bool TimeParser::parse(const std::string& token) {
 
 		// Проверяем, что обе части состоят только из цифр
 		if (!StringUtils::isOnlyDigits(hourStr) || !StringUtils::isOnlyDigits(minStr)) {
+			errorMessage_ = "Ошибка: часы или минуты содержат нецифровые символы";
 			return false;
 		}
 
 		int h = std::stoi(hourStr);
 		int m = std::stoi(minStr);
+
+		// Проверяем валидность минут
+		if (m < 0 || m >= 60) {
+			errorMessage_ = "Ошибка: минуты должны быть в диапазоне 0-59";
+			return false;
+		}
 
 		// Создаем Time - он сам выполнит нормализацию
 		Time tempTime(h, m);
@@ -89,43 +108,54 @@ bool TimeParser::parse(const std::string& token) {
 			isValid_ = true;
 			return true;
 		}
+		else {
+			errorMessage_ = "Ошибка: некорректное время";
+			return false;
+		}
 	}
-	catch (...) {
+	catch (const std::exception& e) {
+		errorMessage_ = std::string("Ошибка: исключение при парсинге времени - ") + e.what();
 		return false;
 	}
-	return false;
+	catch (...) {
+		errorMessage_ = "Ошибка: неизвестное исключение при парсинге времени";
+		return false;
+	}
 }
 
-// Проверяет валидность результата
 bool TimeParser::isValid() const {
 	return isValid_;
 }
 
-// Возвращает результат парсинга
 Time TimeParser::getResult() const {
 	return result_;
 }
 
-// Сбрасывает парсер в начальное состояние
+std::string TimeParser::getErrorMessage() const {
+	return errorMessage_;
+}
+
 void TimeParser::reset() {
 	result_ = Time(0, 0);
 	isValid_ = false;
+	errorMessage_ = "";
 }
 
 // ==================== USER INPUT PARSER ====================
 
-// Конструктор парсера пользовательского ввода
 UserInputParser::UserInputParser()
 	: timeParser_(std::make_unique<TimeParser>())
 	, numberParser_(std::make_unique<NumberParser>())
 {}
 
-// Анализирует пользовательский ввод и извлекает критерии фильтрации
-bool UserInputParser::parse(const std::string& input, double& price, Time& time) {
+bool UserInputParser::parse(const std::string& input, double& price, Time& time, std::string& errorMessage) {
 	std::istringstream iss(input);
 	std::string token;
 	bool hasPrice = false;
 	bool hasTime = false;
+	price = 0.0;
+	time = Time();
+	errorMessage = "";
 
 	// Обрабатываем каждый токен входной строки
 	while (iss >> token) {
@@ -143,5 +173,11 @@ bool UserInputParser::parse(const std::string& input, double& price, Time& time)
 		}
 	}
 
-	return hasPrice || hasTime;
+	if (hasPrice || hasTime) {
+		return true;
+	}
+	else {
+		errorMessage = "Ошибка: не удалось извлечь ни цену, ни время";
+		return false;
+	}
 }

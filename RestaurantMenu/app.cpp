@@ -94,8 +94,9 @@ void RestaurantMenuApp::processCommand(const std::string& command) {
 void RestaurantMenuApp::processUserInput(const std::string& input) {
 	double price = 0.0;
 	Time time;
+	std::string errorMessage;
 
-	if (userInputParser_->parse(input, price, time)) {
+	if (userInputParser_->parse(input, price, time, errorMessage)) {
 		if (price > 0 && time.totalMinutes() > 0) {
 			// Комбинированная фильтрация по цене и времени
 			auto filtered = filter_->filterByPriceAndTime(storage_->getDishes(), price, time);
@@ -122,6 +123,7 @@ void RestaurantMenuApp::processUserInput(const std::string& input) {
 		}
 	}
 	else {
+		std::cout << "Ошибка: " << errorMessage << std::endl;
 		std::cout << "Неизвестная команда или некорректный ввод! Введите 'help' для справки." << std::endl;
 	}
 }
@@ -135,6 +137,12 @@ void RestaurantMenuApp::addDish(const std::string& dishData) {
 	Time time;
 
 	if (parser.extractValuesWithRegex(dishData, name, price, time)) {
+		// Дополнительная проверка: название не должно быть пустым (двойная проверка для надежности)
+		if (name.empty()) {
+			std::cout << "ERROR: название блюда не может быть пустым!" << std::endl;
+			return;
+		}
+
 		if (price <= 0) {
 			std::cout << "ERROR: цена должна быть положительной!" << std::endl;
 			return;
@@ -149,6 +157,7 @@ void RestaurantMenuApp::addDish(const std::string& dishData) {
 	}
 	else {
 		std::cout << "ERROR: неверный формат данных! Используйте: \"Название блюда\" цена время" << std::endl;
+		std::cout << "Пример: add \"Пицца Маргарита\" 12.50 00:30" << std::endl;
 	}
 }
 

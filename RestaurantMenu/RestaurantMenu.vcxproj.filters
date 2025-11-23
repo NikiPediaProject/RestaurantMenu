@@ -73,7 +73,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="menu.txt" />
-    <Text Include="test.txt" />
+    <Text Include="..\menu.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
 </Project>
