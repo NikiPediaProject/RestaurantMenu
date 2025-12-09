@@ -20,7 +20,52 @@ RestaurantMenuApp::RestaurantMenuApp(
 	, printer_(std::move(printer))
 	, fileParser_(std::move(fileParser))
 	, userInputParser_(std::move(userInputParser))
-	, invalidCount_(0) {}
+	, invalidCount_(0) {
+	initializeCommands();
+}
+
+/// Инициализирует карту команд приложения
+void RestaurantMenuApp::initializeCommands() {
+	// Регистрация команд без аргументов
+	commandsMap_["help"] = [this](const std::string&) { cmdHelp(); };
+	commandsMap_["print"] = [this](const std::string&) { cmdPrint(); };
+	commandsMap_["clear"] = [this](const std::string&) { cmdClear(); };
+
+	// Регистрация команд с аргументами
+	commandsMap_["add"] = [this](const std::string& args) { cmdAdd(args); };
+	commandsMap_["delete"] = [this](const std::string& args) { cmdDelete(args); };
+	commandsMap_["save"] = [this](const std::string& args) { cmdSave(args); };
+}
+
+/// Обработчик команды help
+void RestaurantMenuApp::cmdHelp(const std::string&) {
+	showHelp();
+}
+
+/// Обработчик команды print
+void RestaurantMenuApp::cmdPrint(const std::string&) {
+	printMenu();
+}
+
+/// Обработчик команды clear
+void RestaurantMenuApp::cmdClear(const std::string&) {
+	clearConsole();
+}
+
+/// Обработчик команды add
+void RestaurantMenuApp::cmdAdd(const std::string& args) {
+	addDish(args);
+}
+
+/// Обработчик команды delete
+void RestaurantMenuApp::cmdDelete(const std::string& args) {
+	deleteDish(args);
+}
+
+/// Обработчик команды save
+void RestaurantMenuApp::cmdSave(const std::string& args) {
+	saveMenu(args);
+}
 
 // Загружает меню из указанного файла
 void RestaurantMenuApp::loadMenu(const std::string& filename) {
@@ -65,29 +110,29 @@ void RestaurantMenuApp::runInteractive() {
 void RestaurantMenuApp::processCommand(const std::string& command) {
 	if (command.empty()) return;
 
-	// Проверяем специальные команды
-	if (command == "help") {
-		showHelp();
+	std::istringstream iss(command);
+	std::string cmd;
+	iss >> cmd;
+
+	// Извлекаем аргументы команды
+	std::string args;
+	std::getline(iss, args);
+
+	// Удаляем ведущий пробел, если есть
+	if (!args.empty() && args[0] == ' ') {
+		args.erase(0, 1);
 	}
-	else if (command == "print") {
-		printMenu();
+
+	// Ищем команду в карте
+	auto it = commandsMap_.find(cmd);
+	if (it != commandsMap_.end()) {
+		// Выполняем команду через std::function
+		it->second(args);
+		return;
 	}
-	else if (command == "clear") {
-		clearConsole();
-	}
-	else if (command.substr(0, 4) == "add ") {
-		addDish(command.substr(4));
-	}
-	else if (command.substr(0, 7) == "delete ") {
-		deleteDish(command.substr(7));
-	}
-	else if (command.substr(0, 5) == "save ") {
-		saveMenu(command.substr(5));
-	}
-	else {
-		// Если это не команда, пытаемся обработать как критерии фильтрации
-		processUserInput(command);
-	}
+
+	// Если команда не найдена, пытаемся обработать как критерии фильтрации
+	processUserInput(command);
 }
 
 // Обрабатывает пользовательский ввод для фильтрации меню
@@ -123,7 +168,7 @@ void RestaurantMenuApp::processUserInput(const std::string& input) {
 		}
 	}
 	else {
-		std::cout << "Ошибка: " << errorMessage << std::endl;
+		std::cout << "ОШИБКА: " << errorMessage << std::endl;
 		std::cout << "Неизвестная команда или некорректный ввод! Введите 'help' для справки." << std::endl;
 	}
 }

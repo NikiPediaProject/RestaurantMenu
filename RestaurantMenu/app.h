@@ -6,6 +6,8 @@
 #include "parsers.h"
 #include <memory>
 #include <string>
+#include <map>
+#include <functional>
 
 // Предварительные объявления
 class IMenuStorage;
@@ -24,6 +26,20 @@ private:
 	std::unique_ptr<IFileParser> fileParser_;        ///< Парсер файлов
 	std::unique_ptr<UserInputParser> userInputParser_; ///< Парсер пользовательского ввода
 	int invalidCount_;                               ///< Счетчик невалидных записей
+
+	std::map<std::string, std::function<void(const std::string&)>> commandsMap_; ///< Карта команд
+
+private:
+	/// Инициализирует карту команд
+	void initializeCommands();
+
+	/// Обработчики команд для карты
+	void cmdHelp(const std::string& args = "");
+	void cmdPrint(const std::string& args = "");
+	void cmdClear(const std::string& args = "");
+	void cmdAdd(const std::string& args);
+	void cmdDelete(const std::string& args);
+	void cmdSave(const std::string& args);
 
 public:
 	/// Конструктор с инъекцией зависимостей
