@@ -4,7 +4,7 @@
 // ==================== РЕАЛИЗАЦИЯ МЕТОДОВ TIME ====================
 
 // Конструктор с инициализацией компонентов времени
-Time::Time(int hours, int minutes, int days, int years) {
+Time::Time(int hours, int minutes, int days, int years) : time_{} {
 	setTime(hours, minutes, days, years);
 }
 
@@ -51,10 +51,10 @@ void Time::normalizeTime() {
 
 // Возвращает общее время в минутах
 long long Time::totalMinutes() const {
-	return time_.tm_min +
-		time_.tm_hour * 60 +
-		(time_.tm_mday - 1) * 24 * 60 +
-		time_.tm_year * 31 * 24 * 60;
+	return static_cast<long long>(time_.tm_min) +
+		static_cast<long long>(time_.tm_hour) * 60LL +
+		static_cast<long long>(static_cast<long long>(time_.tm_mday) - 1LL) * 24LL * 60LL +
+		static_cast<long long>(time_.tm_year) * 31LL * 24LL * 60LL;
 }
 
 // Возвращает строковое представление времени
