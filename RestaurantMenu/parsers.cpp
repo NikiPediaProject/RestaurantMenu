@@ -7,23 +7,23 @@ NumberParser::NumberParser() : result_(0.0), isValid_(false), errorMessage_("") 
 
 bool NumberParser::parse(const std::string& str) {
 	reset();
+
 	if (str.empty()) {
 		errorMessage_ = "Ошибка: пустая строка";
 		return false;
 	}
 
 	std::string numberStr = str;
-	// Заменяем запятые на точки для корректного парсинга
-	for (char& c : numberStr) {
-		if (c == ',') c = '.';
-	}
 
-	// Проверяем допустимые символы
-	for (char c : numberStr) {
-		if (!StringUtils::isDigitASCII(c) && c != '.' && c != '-') {
-			errorMessage_ = "Ошибка: строка содержит недопустимые символы";
-			return false;
-		}
+	// Заменяем запятые на точки с помощью std::replace_if для корректного парсинга
+	std::replace_if(numberStr.begin(), numberStr.end(),
+		[](char c) { return c == ','; }, '.');
+
+	// Проверяем допустимые символы: цифры, точка, минус
+	if (!std::all_of(numberStr.begin(), numberStr.end(),
+		[](char c) { return StringUtils::isDigitASCII(c) || c == '.' || c == '-'; })) {
+		errorMessage_ = "Ошибка: строка содержит недопустимые символы";
+		return false;
 	}
 
 	std::stringstream ss(numberStr);
@@ -48,9 +48,7 @@ double NumberParser::getResult() const {
 	return result_;
 }
 
-std::string NumberParser::getErrorMessage() const {
-	return errorMessage_;
-}
+// Реализация getErrorMessage() перенесена в заголовочный файл (возвращает ссылку)
 
 void NumberParser::reset() {
 	result_ = 0.0;
@@ -68,6 +66,7 @@ bool TimeParser::isValidTime(const Time& time) {
 
 bool TimeParser::parse(const std::string& token) {
 	reset();
+
 	std::string timeStr = StringUtils::trim(token);
 	timeStr.erase(std::remove(timeStr.begin(), timeStr.end(), ' '), timeStr.end());
 
@@ -103,6 +102,7 @@ bool TimeParser::parse(const std::string& token) {
 
 		// Создаем Time - он сам выполнит нормализацию
 		Time tempTime(h, m);
+
 		if (isValidTime(tempTime)) {
 			result_ = tempTime;
 			isValid_ = true;
@@ -131,9 +131,7 @@ Time TimeParser::getResult() const {
 	return result_;
 }
 
-std::string TimeParser::getErrorMessage() const {
-	return errorMessage_;
-}
+// Реализация getErrorMessage() перенесена в заголовочный файл (возвращает ссылку)
 
 void TimeParser::reset() {
 	result_ = Time(0, 0);
@@ -151,8 +149,10 @@ UserInputParser::UserInputParser()
 bool UserInputParser::parse(const std::string& input, double& price, Time& time, std::string& errorMessage) {
 	std::istringstream iss(input);
 	std::string token;
+
 	bool hasPrice = false;
 	bool hasTime = false;
+
 	price = 0.0;
 	time = Time();
 	errorMessage = "";

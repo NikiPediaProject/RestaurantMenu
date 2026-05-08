@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <iterator>   // для std::back_inserter
 
 // ==================== MENU SORTER ====================
 
@@ -33,9 +34,10 @@ MenuFilter::MenuFilter(std::unique_ptr<IMenuSorter> sorter)
 // Фильтрует блюда по цене и сортирует по убыванию цены
 std::vector<Dish> MenuFilter::filterByPrice(const std::vector<Dish>& dishes, double maxPrice) const {
 	std::vector<Dish> result;
-	for (const auto& dish : dishes) {
-		if (dish.price < maxPrice) result.push_back(dish);
-	}
+	// Используем std::copy_if для фильтрации по цене
+	std::copy_if(dishes.begin(), dishes.end(),
+		std::back_inserter(result),
+		[maxPrice](const Dish& dish) { return dish.price < maxPrice; });
 	sorter_->sortByPriceDesc(result);
 	return result;
 }
@@ -44,9 +46,10 @@ std::vector<Dish> MenuFilter::filterByPrice(const std::vector<Dish>& dishes, dou
 std::vector<Dish> MenuFilter::filterByTime(const std::vector<Dish>& dishes, const Time& maxTime) const {
 	std::vector<Dish> result;
 	long long maxTotalMinutes = maxTime.totalMinutes();
-	for (const auto& dish : dishes) {
-		if (dish.totalMinutes() < maxTotalMinutes) result.push_back(dish);
-	}
+	// Фильтруем с помощью std::copy_if по общему времени приготовления
+	std::copy_if(dishes.begin(), dishes.end(),
+		std::back_inserter(result),
+		[maxTotalMinutes](const Dish& dish) { return dish.totalMinutes() < maxTotalMinutes; });
 	sorter_->sortByTimeAsc(result);
 	return result;
 }
@@ -55,11 +58,12 @@ std::vector<Dish> MenuFilter::filterByTime(const std::vector<Dish>& dishes, cons
 std::vector<Dish> MenuFilter::filterByPriceAndTime(const std::vector<Dish>& dishes, double maxPrice, const Time& maxTime) const {
 	std::vector<Dish> result;
 	long long maxTotalMinutes = maxTime.totalMinutes();
-	for (const auto& dish : dishes) {
-		if (dish.price < maxPrice && dish.totalMinutes() < maxTotalMinutes) {
-			result.push_back(dish);
-		}
-	}
+	// Комбинированная фильтрация через std::copy_if
+	std::copy_if(dishes.begin(), dishes.end(),
+		std::back_inserter(result),
+		[maxPrice, maxTotalMinutes](const Dish& dish) {
+		return dish.price < maxPrice && dish.totalMinutes() < maxTotalMinutes;
+	});
 	sorter_->sortAlphabetically(result);
 	return result;
 }
@@ -89,7 +93,6 @@ void MenuStorage::clear() {
 // Удаляет конкретное блюдо по точному совпадению всех параметров
 bool MenuStorage::removeDish(const std::string& name, double price, const Time& time) {
 	const double epsilon = 0.001;
-
 	size_t initialSize = dishes_.size();
 
 	// Используем публичные методы для сравнения

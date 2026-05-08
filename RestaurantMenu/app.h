@@ -53,37 +53,28 @@ public:
 
 	/// Загружает меню из файла
 	void loadMenu(const std::string& filename);
-
 	/// Очищает текущее меню
 	void clearMenu();
-
 	/// Выводит все меню
 	void printMenu() const;
-
 	/// Запускает интерактивный режим
 	void runInteractive();
-
 	/// Обрабатывает команды управления
 	void processCommand(const std::string& command);
 
 private:
 	/// Обрабатывает ввод для фильтрации
 	void processUserInput(const std::string& input);
-
 	/// Добавляет блюдо
 	void addDish(const std::string& dishData);
-
 	/// Удаляет блюдо
 	void deleteDish(const std::string& dishData);
-
 	/// Сохраняет меню в файл
 	void saveMenu(const std::string& filename) const;
-
-	/// Очищает консоль
-	void clearConsole() const;
-
-	/// Показывает справку по командам
-	void showHelp() const;
+	/// Очищает консоль (статический метод)
+	static void clearConsole();
+	/// Показывает справку по командам (статический метод)
+	static void showHelp();
 };
 
 #endif // APP_H

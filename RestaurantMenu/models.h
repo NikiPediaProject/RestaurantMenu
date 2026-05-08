@@ -10,12 +10,12 @@
 /// Класс для представления времени с поддержкой часов, минут, дней и лет
 class Time {
 private:
-	std::tm time_{};              ///< Внутреннее представление времени в структуре tm + Инициализация по умолчанию
-	void normalizeTime();       ///< Метод для нормализации компонентов времени
+	std::tm time_{};                     ///< Внутреннее представление времени в структуре tm + Инициализация по умолчанию
+	void normalizeTime();                ///< Метод для нормализации компонентов времени
 
 public:
-	/// Конструктор с инициализацией компонентов времени
-	Time(int hours = 0, int minutes = 0, int days = 0, int years = 0);
+	/// Конструктор с инициализацией компонентов времени (explicit – запрещает неявное преобразование из int)
+	explicit Time(int hours = 0, int minutes = 0, int days = 0, int years = 0);
 
 	/// Устанавливает время с автоматической нормализацией
 	void setTime(int hours, int minutes, int days = 0, int years = 0);
@@ -33,10 +33,10 @@ public:
 	bool operator==(const Time& other) const;
 
 	// Геттеры для доступа к компонентам времени
-	int getHours() const { return time_.tm_hour; }
+	int getHours()   const { return time_.tm_hour; }
 	int getMinutes() const { return time_.tm_min; }
-	int getDays() const { return time_.tm_mday - 1; }
-	int getYears() const { return time_.tm_year; }
+	int getDays()    const { return time_.tm_mday - 1; }
+	int getYears()   const { return time_.tm_year; }
 };
 
 /// Класс, представляющий блюдо в меню ресторана
@@ -48,7 +48,6 @@ public:
 
 	/// Конструктор с объектом Time
 	Dish(const std::string& n, double p, const Time& t);
-
 	/// Конструктор с отдельными компонентами времени
 	Dish(const std::string& n, double p, int hours, int minutes, int days = 0, int years = 0);
 

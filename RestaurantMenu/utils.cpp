@@ -1,4 +1,5 @@
 ﻿#include "utils.h"
+#include <algorithm>   // для std::all_of
 
 // ==================== РЕАЛИЗАЦИЯ STRING UTILS ====================
 
@@ -11,11 +12,8 @@ bool StringUtils::isDigitASCII(char c) {
 bool StringUtils::isOnlyDigits(const std::string& str) {
 	if (str.empty()) return false;
 
-	// Проверяем каждый символ строки на цифровое значение
-	for (char c : str) {
-		if (!isDigitASCII(c)) return false;
-	}
-	return true;
+	// Проверяем каждый символ строки на цифровое значение (используем std::all_of)
+	return std::all_of(str.begin(), str.end(), isDigitASCII);
 }
 
 /// Проверяет, является ли символ безопасным пробельным символом

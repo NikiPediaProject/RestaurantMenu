@@ -4,7 +4,8 @@
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
-#include <cstdlib> // Для system()
+#include <cstdlib>   // Для system()
+#include <iterator>  // для std::back_inserter
 
 // Конструктор с инъекцией зависимостей
 RestaurantMenuApp::RestaurantMenuApp(
@@ -20,7 +21,8 @@ RestaurantMenuApp::RestaurantMenuApp(
 	, printer_(std::move(printer))
 	, fileParser_(std::move(fileParser))
 	, userInputParser_(std::move(userInputParser))
-	, invalidCount_(0) {
+	, invalidCount_(0)
+{
 	initializeCommands();
 }
 
@@ -71,7 +73,9 @@ void RestaurantMenuApp::cmdSave(const std::string& args) {
 void RestaurantMenuApp::loadMenu(const std::string& filename) {
 	// Очищаем предыдущее меню перед загрузкой нового
 	clearMenu();
+
 	fileParser_->parseFile(filename, *storage_, invalidCount_);
+
 	sorter_->sortAlphabetically(const_cast<std::vector<Dish>&>(storage_->getDishes()));
 }
 
@@ -117,7 +121,6 @@ void RestaurantMenuApp::processCommand(const std::string& command) {
 	// Извлекаем аргументы команды
 	std::string args;
 	std::getline(iss, args);
-
 	// Удаляем ведущий пробел, если есть
 	if (!args.empty() && args[0] == ' ') {
 		args.erase(0, 1);
@@ -187,7 +190,6 @@ void RestaurantMenuApp::addDish(const std::string& dishData) {
 			std::cout << "ERROR: название блюда не может быть пустым!" << std::endl;
 			return;
 		}
-
 		if (price <= 0) {
 			std::cout << "ERROR: цена должна быть положительной!" << std::endl;
 			return;
@@ -208,7 +210,7 @@ void RestaurantMenuApp::addDish(const std::string& dishData) {
 
 // Удаляет блюдо из меню
 void RestaurantMenuApp::deleteDish(const std::string& dishData) {
-	std::string trimmedData = dishData;
+	// (переменная trimmedData удалена за ненадобностью; её присваивание не использовалось)
 
 	// Проверяем, есть ли кавычки в данных
 	if (dishData.find('"') == std::string::npos) {
@@ -218,11 +220,10 @@ void RestaurantMenuApp::deleteDish(const std::string& dishData) {
 
 		// Создаем временное хранилище для блюд, которые не нужно удалять
 		std::vector<Dish> remainingDishes;
-		for (const auto& dish : storage_->getDishes()) {
-			if (dish.name != name) {
-				remainingDishes.push_back(dish);
-			}
-		}
+		const auto& allDishes = storage_->getDishes();
+		std::copy_if(allDishes.begin(), allDishes.end(),
+			std::back_inserter(remainingDishes),
+			[&name](const Dish& dish) { return dish.name != name; });
 
 		// Очищаем основное хранилище и добавляем обратно только нужные блюда
 		storage_->clear();
@@ -264,10 +265,8 @@ void RestaurantMenuApp::saveMenu(const std::string& filename) const {
 	if (filename == "menu.txt") {
 		std::cout << "WARNING: вы пытаетесь сохранить в файл menu.txt. Это перезапишет исходный файл меню." << std::endl;
 		std::cout << "Продолжить? (y/n): ";
-
 		std::string answer;
 		std::getline(std::cin, answer);
-
 		if (answer != "y" && answer != "Y") {
 			std::cout << "Сохранение отменено." << std::endl;
 			return;
@@ -283,20 +282,20 @@ void RestaurantMenuApp::saveMenu(const std::string& filename) const {
 	}
 }
 
-// Очищает консоль
-void RestaurantMenuApp::clearConsole() const {
+// Очищает консоль (статический метод)
+void RestaurantMenuApp::clearConsole() {
 	system("cls");
 }
 
-// Показывает справку по доступным командам
-void RestaurantMenuApp::showHelp() const {
+// Показывает справку по доступным командам (статический метод)
+void RestaurantMenuApp::showHelp() {
 	std::cout << std::endl << "ДОСТУПНЫЕ КОМАНДЫ:" << std::endl;
 	std::cout << "  help                         - показать эту справку" << std::endl;
 	std::cout << "  print                        - вывести меню" << std::endl;
 	std::cout << "  clear                        - очистить консоль" << std::endl;
-	std::cout << "  add \"Название\" цена время    - добавить блюдо" << std::endl;
-	std::cout << "  delete Название              - удалить все блюда с таким названием" << std::endl;
-	std::cout << "  delete \"Название\" цена время - удалить конкретное блюдо" << std::endl;
+	std::cout << "  add \"Название\" цена время     - добавить блюдо" << std::endl;
+	std::cout << "  delete Название               - удалить все блюда с таким названием" << std::endl;
+	std::cout << "  delete \"Название\" цена время   - удалить конкретное блюдо" << std::endl;
 	std::cout << "  save имя_файла               - сохранить меню в файл" << std::endl;
 	std::cout << "  exit                         - выйти в меню выбора файла" << std::endl;
 	std::cout << std::endl << "ФИЛЬТРАЦИЯ:" << std::endl;

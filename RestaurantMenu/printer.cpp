@@ -32,15 +32,14 @@ void MenuPrinter::printFilteredDishes(const std::vector<Dish>& dishes, const std
 	}
 }
 
-// Выводит заголовок таблицы меню
-void MenuPrinter::printTableHeader() const {
+// Статический метод вывода заголовка таблицы меню
+void MenuPrinter::printTableHeader() {
 	// Заголовок таблицы с выравниванием
 	std::cout << std::setw(5) << std::right << "№"
 		<< " "
 		<< std::setw(25) << std::left << "Название блюда"
 		<< std::setw(10) << std::left << "Цена"
 		<< "Время приготовления" << std::endl;
-
 	// Разделительная линия
 	std::cout << std::string(60, '-') << std::endl;
 }
